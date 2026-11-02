@@ -55,7 +55,7 @@
     background: #ffffff !important;
     color: #0f172a !important;
   }
-  header, footer, #loginSection, #tabHourwise, #tabDaywise, .filter-btn, #refreshBtn, #printBtn, #subjectSearchInput, .target-toggle-btn {
+  header, footer, #loginSection, #tabHourwise, #tabDaywise, .filter-btn, #refreshBtn, #printBtn, #shareBtn, #toggleSimulatorBtn, #simulatorPanel, #subjectSearchInput, .target-toggle-btn, #toast {
     display: none !important;
   }
   #dashboardSection {

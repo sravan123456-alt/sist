@@ -215,10 +215,10 @@ async function handleLogin(req, res) {
 
     // Step 4: Fetch Day-wise Attendance
     let dailyData = {
-      totalWorkingDays: 79,
-      daysPresent: 62,
-      daysAbsent: 17,
-      percentage: 78.5,
+      totalWorkingDays: 0,
+      daysPresent: 0,
+      daysAbsent: 0,
+      percentage: 0,
       records: [],
       absences: []
     };
