@@ -45,8 +45,8 @@ The official ERP portal (`erp.sathyabama.ac.in`) only displays hour-wise breakdo
 ## Login Credentials
 
 Any Sathyabama student can log in using their ERP credentials:
-- **Register Number**: e.g., `145130595`
-- **Password / DOB**: Usually Date of Birth in `YYYY-MM-DD` format (e.g., `2007-10-08`).
+- **Register Number**: e.g., `123344555`
+- **Password / DOB**: Usually Date of Birth in `YYYY-MM-DD` format (e.g., `2000-12-02`).
 
 ---
 
