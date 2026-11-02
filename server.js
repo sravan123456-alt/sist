@@ -415,10 +415,14 @@ const server = http.createServer(async (req, res) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(` Sathyabama Attendance Tracker running on:`);
-  console.log(` http://localhost:${PORT}`);
-  console.log(` Zero dependencies. Single-point percentages active.`);
-  console.log(`=======================================================`);
-});
+if (require.main === module || (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME)) {
+  server.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(` Sathyabama Attendance Tracker running on:`);
+    console.log(` http://localhost:${PORT}`);
+    console.log(` Zero dependencies. Single-point percentages active.`);
+    console.log(`=======================================================`);
+  });
+}
+
+module.exports = server;
