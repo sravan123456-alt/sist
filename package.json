@@ -2,8 +2,9 @@
   "name": "sist-attendance",
   "version": "1.1.0",
   "description": "Total consolidated attendance tracker and bunk calculator for Sathyabama ERP",
-  "private": true,
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "dev": "node server.js"
   },
   "keywords": [

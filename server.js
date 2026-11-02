@@ -379,7 +379,8 @@ const server = http.createServer(async (req, res) => {
     return res.end();
   }
 
-  const url = new URL(req.url, `http://${req.headers.host}`);
+  const host = req.headers && req.headers.host ? req.headers.host : 'localhost';
+  const url = new URL(req.url, `http://${host}`);
 
   if (url.pathname === '/api/login' && req.method === 'POST') {
     return handleLogin(req, res);
@@ -415,7 +416,7 @@ const server = http.createServer(async (req, res) => {
   });
 });
 
-if (require.main === module || (!process.env.VERCEL && !process.env.AWS_LAMBDA_FUNCTION_NAME)) {
+if (require.main === module) {
   server.listen(PORT, () => {
     console.log(`=======================================================`);
     console.log(` Sathyabama Attendance Tracker running on:`);
@@ -425,4 +426,5 @@ if (require.main === module || (!process.env.VERCEL && !process.env.AWS_LAMBDA_F
   });
 }
 
-module.exports = server;
+module.exports = (req, res) => { server.emit('request', req, res); };
+module.exports.default = module.exports;
