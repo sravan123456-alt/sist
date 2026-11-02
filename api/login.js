@@ -107,13 +107,14 @@ module.exports = async function handler(req, res) {
 
   if (req.method !== 'POST') {
     res.statusCode = 405;
+    res.setHeader('Content-Type', 'application/json');
     return res.end(JSON.stringify({ success: false, message: 'Method Not Allowed' }));
   }
 
   try {
     let body = req.body;
     if (typeof body === 'string') {
-      body = JSON.parse(body);
+      try { body = JSON.parse(body); } catch (e) { body = {}; }
     } else if (!body) {
       body = await new Promise((resolve) => {
         let b = '';
@@ -154,7 +155,19 @@ module.exports = async function handler(req, res) {
       body: JSON.stringify(loginPayload)
     });
 
-    const loginData = await loginRes.json();
+    const loginText = await loginRes.text();
+    let loginData;
+    try {
+      loginData = JSON.parse(loginText);
+    } catch (e) {
+      console.error('ERP login returned non-JSON:', loginText.slice(0, 300));
+      res.statusCode = 502;
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify({
+        success: false,
+        message: 'Sathyabama ERP returned an invalid response. Please try again.'
+      }));
+    }
 
     if (!loginData.status || !loginData.responseData || !loginData.responseData.login) {
       res.statusCode = 401;
@@ -179,7 +192,9 @@ module.exports = async function handler(req, res) {
       body: JSON.stringify({ StudentId })
     });
 
-    const viewData = await viewRes.json();
+    const viewText = await viewRes.text();
+    let viewData = {};
+    try { viewData = JSON.parse(viewText); } catch (e) {}
     const studentInfo = (viewData.responseData && viewData.responseData.StudentInfo && viewData.responseData.StudentInfo[0]) || {};
 
     const currentSemester = studentInfo.CurrentSemester || studentInfo.Semester || 3;
@@ -200,7 +215,9 @@ module.exports = async function handler(req, res) {
       body: JSON.stringify({ StudentId })
     });
 
-    const hourwiseData = await hourwiseRes.json();
+    const hourwiseText = await hourwiseRes.text();
+    let hourwiseData = {};
+    try { hourwiseData = JSON.parse(hourwiseText); } catch (e) {}
     const rawSubjects = (hourwiseData.responseData && Array.isArray(hourwiseData.responseData)) ? hourwiseData.responseData : [];
 
     // Step 4: Fetch Day-wise Attendance

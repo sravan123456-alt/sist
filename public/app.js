@@ -1,8 +1,8 @@
 // Application State
 let appData = null;
-let currentTarget = 80; // Default to 80% like sistpilot, with 75% toggle
-let currentTab = 'hourwise'; // 'hourwise' or 'daywise'
-let currentFilter = 'all'; // 'all', 'shortage', 'THEORY', 'PRACTICAL'
+let currentTarget = 80;
+let currentTab = 'hourwise';
+let currentFilter = 'all';
 let searchQuery = '';
 
 // DOM Elements
@@ -22,7 +22,7 @@ const logoutBtn = document.getElementById('logoutBtn');
 const refreshBtn = document.getElementById('refreshBtn');
 const printBtn = document.getElementById('printBtn');
 
-// Nav & Header Profile Elements
+// Nav & Header Elements
 const navAvatar = document.getElementById('navAvatar');
 const navStudentName = document.getElementById('navStudentName');
 const navRegNo = document.getElementById('navRegNo');
@@ -70,9 +70,7 @@ const dwAbsent = document.getElementById('dwAbsent');
 const dwPercentage = document.getElementById('dwPercentage');
 const absentDatesContainer = document.getElementById('absentDatesContainer');
 
-// --- Initialization ---
 window.addEventListener('DOMContentLoaded', () => {
-  // Check if session was cached
   const cachedData = sessionStorage.getItem('sathyabama_session');
   if (cachedData) {
     try {
@@ -87,20 +85,15 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupEventListeners() {
-  // Password visibility toggle
   togglePasswordBtn.addEventListener('click', () => {
     const isPass = passwordInput.type === 'password';
     passwordInput.type = isPass ? 'text' : 'password';
     togglePasswordBtn.innerHTML = isPass ? '<i class="fa-regular fa-eye-slash text-xs"></i>' : '<i class="fa-regular fa-eye text-xs"></i>';
   });
 
-  // Login form submit
   loginForm.addEventListener('submit', handleLoginSubmit);
-
-  // Logout
   logoutBtn.addEventListener('click', handleLogout);
 
-  // Refresh / Sync
   refreshBtn.addEventListener('click', () => {
     const reg = appData?.student?.registerNumber || regNoInput.value;
     const pass = passwordInput.value;
@@ -111,12 +104,10 @@ function setupEventListeners() {
     }
   });
 
-  // Print
   printBtn.addEventListener('click', () => {
     window.print();
   });
 
-  // Target Toggle Buttons (75% vs 80%)
   targetToggleBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       targetToggleBtns.forEach(b => {
@@ -131,17 +122,14 @@ function setupEventListeners() {
     });
   });
 
-  // Tab Switching
   tabHourwise.addEventListener('click', () => switchTab('hourwise'));
   tabDaywise.addEventListener('click', () => switchTab('daywise'));
 
-  // Search Input
   subjectSearchInput.addEventListener('input', (e) => {
     searchQuery = e.target.value.toLowerCase().trim();
     renderSubjectCards();
   });
 
-  // Filter Buttons
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach(b => {
@@ -175,7 +163,6 @@ function switchTab(tab) {
   }
 }
 
-// Handle Login Submission
 async function handleLoginSubmit(e) {
   e.preventDefault();
   loginError.classList.add('hidden');
@@ -186,7 +173,7 @@ async function handleLoginSubmit(e) {
   if (!regNo || !password) return;
 
   submitLoginBtn.disabled = true;
-  submitBtnText.textContent = 'Authenticating...';
+  submitBtnText.textContent = 'Authenticating with ERP...';
   submitBtnIcon.className = 'fa-solid fa-spinner fa-spin text-xs';
 
   await fetchAttendance(regNo, password, currentTarget);
@@ -196,7 +183,6 @@ async function handleLoginSubmit(e) {
   submitBtnIcon.className = 'fa-solid fa-arrow-right text-xs';
 }
 
-// Fetch Attendance API
 async function fetchAttendance(registerNumber, password, targetPercent) {
   try {
     const res = await fetch('/api/login', {
@@ -205,7 +191,14 @@ async function fetchAttendance(registerNumber, password, targetPercent) {
       body: JSON.stringify({ registerNumber, password, targetPercent })
     });
 
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (parseErr) {
+      console.error('Non-JSON response received:', text.slice(0, 300));
+      throw new Error('Sathyabama ERP took too long or returned an unexpected format. Please try again in 5 seconds.');
+    }
 
     if (!data.success) {
       loginErrorMsg.textContent = data.message || 'Login failed. Please check your credentials.';
@@ -218,12 +211,11 @@ async function fetchAttendance(registerNumber, password, targetPercent) {
     renderDashboard();
 
   } catch (err) {
-    loginErrorMsg.textContent = 'Unable to connect to ERP. ' + err.message;
+    loginErrorMsg.textContent = err.message || 'Unable to connect to ERP.';
     loginError.classList.remove('hidden');
   }
 }
 
-// Logout
 function handleLogout() {
   appData = null;
   sessionStorage.removeItem('sathyabama_session');
@@ -233,7 +225,6 @@ function handleLogout() {
   passwordInput.value = '';
 }
 
-// Render Complete Dashboard
 function renderDashboard() {
   if (!appData) return;
 
@@ -245,12 +236,10 @@ function renderDashboard() {
   const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=4f46e5&color=fff&size=128`;
   const photo = student.photoUrl || defaultAvatar;
 
-  // Header
   navAvatar.src = photo;
   navStudentName.textContent = student.name;
   navRegNo.textContent = student.registerNumber;
 
-  // Banner
   dashAvatar.src = photo;
   dashStudentName.textContent = student.name;
   dashRegBadge.textContent = student.registerNumber;
@@ -260,20 +249,17 @@ function renderDashboard() {
   dashSecText.textContent = student.section;
   dashDateRangeText.textContent = appData.currentSemester?.dateRange || 'Current Academic Semester';
 
-  // Stats Counters
   const hw = appData.hourwiseSummary;
   tilePresent.textContent = `${hw.totalPresent}h`;
   tileAbsent.textContent = `${hw.totalAbsent}h`;
   tileScheduled.textContent = `${hw.totalScheduledHours}h`;
 
-  // Day-wise stats
   const dw = appData.dailySummary;
   dwWorkingDays.textContent = dw.totalWorkingDays;
   dwPresent.textContent = dw.daysPresent;
   dwAbsent.textContent = dw.daysAbsent;
   dwPercentage.textContent = `${dw.percentage.toFixed(1)}%`;
 
-  // Render Day-wise Absences
   absentDatesContainer.innerHTML = '';
   if (dw.absences && dw.absences.length > 0) {
     dw.absences.forEach(abs => {
@@ -286,11 +272,9 @@ function renderDashboard() {
     absentDatesContainer.innerHTML = '<span class="text-xs text-emerald-400">Zero recorded absent days!</span>';
   }
 
-  // Update advisor & cards
   updateAdvisorAndCards();
 }
 
-// Compute dynamic buffer for a subject based on chosen target
 function computeSubjectBuffer(present, conducted, targetPercent) {
   const target = targetPercent / 100;
   const pct = conducted > 0 ? (present / conducted) * 100 : 0;
@@ -314,18 +298,16 @@ function computeSubjectBuffer(present, conducted, targetPercent) {
   }
 }
 
-// Update Advisor & Gauge
 function updateAdvisorAndCards() {
   if (!appData) return;
 
   const hw = appData.hourwiseSummary;
-  const pct = hw.overallPercentage; // Single point e.g. 79.5%
+  const pct = hw.overallPercentage;
 
   overallPctText.textContent = `${pct.toFixed(1)}%`;
   subtextAttended.textContent = hw.totalPresent;
   subtextConducted.textContent = hw.totalConductedHours;
 
-  // SVG Circle Stroke calculation: radius = 50 => perimeter = 314.159
   const circumference = 314.159;
   const offset = circumference - (Math.min(100, Math.max(0, pct)) / 100) * circumference;
   overallProgressRing.style.strokeDashoffset = offset;
@@ -347,7 +329,6 @@ function updateAdvisorAndCards() {
   renderSubjectCards();
 }
 
-// Render Subject Cards (Matching Sistpilot Style)
 function renderSubjectCards() {
   if (!appData || !appData.subjects) return;
 
@@ -379,17 +360,11 @@ function renderSubjectCards() {
   subjectCardsContainer.innerHTML = filtered.map(sub => {
     const buffer = computeSubjectBuffer(sub.present, sub.conductedHours, currentTarget);
     const isSafe = buffer.isSafe;
-
-    // Single decimal point percentage
     const pctStr = `${sub.percentage.toFixed(1)}%`;
 
-    // Colors matching sistpilot:
-    // Safe: green (#34d399 / text-emerald-400)
-    // Shortage: reddish coral (#f87171 / text-rose-400)
     const pctColor = isSafe ? 'text-emerald-400' : 'text-rose-400';
     const barFillColor = isSafe ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-gradient-to-r from-rose-500 to-red-400';
 
-    // Status pill
     const pillClass = isSafe
       ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
       : 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
@@ -397,7 +372,6 @@ function renderSubjectCards() {
       ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-1"></span>'
       : '<span class="w-1.5 h-1.5 rounded-full bg-rose-400 inline-block mr-1"></span>';
 
-    // Deficit warning if remaining hours in semester are fewer than needed
     let shortageWarning = '';
     if (!isSafe && buffer.needToAttend > sub.hoursLeft) {
       shortageWarning = `<span class="text-[10px] text-amber-400 block mt-1"><i class="fa-solid fa-circle-exclamation text-[9px] mr-1"></i>Deficit exceeds remaining syllabus hours (${buffer.needToAttend}h needed vs ~${sub.hoursLeft}h left).</span>`;
@@ -405,7 +379,6 @@ function renderSubjectCards() {
 
     return `
       <div class="subject-card bg-[#121320] border border-[#20233a] rounded-2xl p-4 sm:p-5 shadow-lg relative overflow-hidden">
-        <!-- Top Row: Name, Badge, Code & Percentage -->
         <div class="flex items-start justify-between gap-3 mb-3">
           <div>
             <h3 class="text-sm sm:text-base font-bold text-white tracking-tight">${sub.name}</h3>
@@ -419,22 +392,18 @@ function renderSubjectCards() {
             </div>
           </div>
 
-          <!-- Single Point Percentage -->
           <div class="text-right flex-shrink-0">
             <span class="text-lg sm:text-xl font-extrabold font-mono ${pctColor}">${pctStr}</span>
           </div>
         </div>
 
-        <!-- Progress Bar with Target Notch Marker -->
         <div class="relative my-3">
           <div class="progress-container w-full h-1.5 bg-[#1b1d30] rounded-full overflow-hidden">
             <div class="h-full ${barFillColor} rounded-full transition-all duration-700" style="width: ${Math.min(100, sub.percentage)}%"></div>
           </div>
-          <!-- Target Notch Line -->
           <div class="progress-notch" style="left: ${currentTarget}%" title="Target: ${currentTarget}%"></div>
         </div>
 
-        <!-- Bottom Row: Status Pill (Can skip / Attend next) & Hours Left -->
         <div class="flex flex-wrap items-center justify-between gap-2 mt-2 pt-2 border-t border-[#181a2c]">
           <div class="inline-flex items-center text-xs font-semibold px-2.5 py-0.5 rounded-full ${pillClass}">
             ${pillDot} ${buffer.label}
