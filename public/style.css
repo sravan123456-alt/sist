@@ -1,0 +1,73 @@
+/* Enhanced Styling matching sistpilot theme */
+
+/* Progress Bar Notch Markers */
+.progress-container {
+  position: relative;
+  background-color: #1a1c2e;
+  border-radius: 9999px;
+  height: 6px;
+  overflow: visible;
+}
+
+.progress-notch {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background-color: #475569;
+  z-index: 10;
+  border-radius: 1px;
+}
+
+/* Smooth ring transition */
+#overallProgressRing {
+  transition: stroke-dashoffset 0.8s ease-in-out, stroke 0.4s ease;
+}
+
+/* Card hover glow */
+.subject-card {
+  transition: all 0.2s ease-in-out;
+}
+.subject-card:hover {
+  border-color: #2e3352;
+  background-color: #151728;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #090a10;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f2238;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2e3250;
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+  header, footer, #loginSection, #tabHourwise, #tabDaywise, .filter-btn, #refreshBtn, #printBtn, #subjectSearchInput, .target-toggle-btn {
+    display: none !important;
+  }
+  #dashboardSection {
+    display: block !important;
+  }
+  .bg-\[\#121320\], .bg-\[\#0c0d16\], .bg-\[\#141527\] {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+  }
+  .text-white, .text-slate-100, .text-slate-200, .text-slate-300 {
+    color: #0f172a !important;
+  }
+}
